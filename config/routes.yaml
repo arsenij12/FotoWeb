@@ -1,0 +1,15 @@
+api_register:
+    path: '/api/register'
+    controller: 'App\Controller\RegisterController::register'
+    methods: ['POST', 'GET']
+api_login:
+    path: '/api/login'
+    controller: 'App\Controller\LoginControlerController::login'
+    methods: ['POST', 'GET']
+upload_image:
+    path: '/api/upload-image'
+    controller: 'App\Controller\ImageController::upload'
+    methods: ['POST', 'GET']
+images:
+  path: /images/{filename}
+  controller: App\Controller\ImageController::show

@@ -1,0 +1,26 @@
+# config/services.yaml
+
+parameters:
+    images_directory: '%kernel.project_dir%/public/images'
+
+services:
+
+    App\Controller\ImageController:
+        public: true
+    _defaults:
+        autowire: true
+        autoconfigure: true
+        public: false
+    
+    App\:
+        resource: '../src/*'
+        exclude: '../src/{DependencyInjection,Entity,Migrations,Tests,Kernel.php}'
+
+    App\Controller\:
+        resource: '../src/Controller'
+        tags: ['controller.service_arguments']
+
+    pdo:
+        class: PDO
+        arguments:
+            $dsn: 'pgsql:host=127.0.0.1;port=5432;dbname=Symfony;user=operator;password=qpwoeivb1029'
