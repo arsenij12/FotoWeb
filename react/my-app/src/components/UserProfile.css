@@ -1,0 +1,26 @@
+
+  
+  
+  .user-profile-main {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+  }
+  
+  .profile-info-card {
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #30303086;
+  }
+  
+  .profile-info-label {
+    font-weight: bold;
+  }
+  
+  .profile-info {
+    margin-top: 5px;
+    color: #fff;
+  }
+  
