@@ -56,7 +56,7 @@ const About = () => {
           </div>
           <div className="col-md-4">
             <div className="slider-container">
-              <Slider>
+              <Slider autoplay = "true">
                 <div className="slide-item"><img src="http://localhost:8000/images/Img1.png" alt="Image 1"></img></div>
                 <div className="slide-item"><img src="http://localhost:8000/images/img2.png" alt="Image 2"></img></div>
                 <div className="slide-item"><img src="http://localhost:8000/images/Img3.png" alt="Image 3"></img></div>

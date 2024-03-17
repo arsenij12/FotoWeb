@@ -100,8 +100,8 @@ body .card-body {
   
   @media (max-width: 768px) {
     header.menu-open {
-        padding-bottom: 50px; 
-      }      
+      padding-bottom: 50px; 
+    }      
     .main-nav {
       flex-direction: column;
       position: fixed;
@@ -123,8 +123,7 @@ body .card-body {
     .menu-btn {
       display: block; 
       top: 20px;
-      nav-up: auto;
-      right: 20px;
+      right: 20px; /* Исправлено */
       background-color: transparent;
       color: #fff;
       border: none;
@@ -132,5 +131,6 @@ body .card-body {
       font-size: 16px;
     }
   }
+  
   
   
