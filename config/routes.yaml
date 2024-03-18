@@ -13,3 +13,35 @@ upload_image:
 images:
   path: /images/{filename}
   controller: App\Controller\ImageController::show
+delete-account: 
+  path: /api/delete-account
+  controller: App\Controller\RegisterController::deleteAccount
+  methods: ['POST', 'GET']
+change_password:
+  path: '/api/change-password'
+  controller: 'App\Controller\RegisterController::changePassword'
+  methods: ['POST', 'GET']
+add_social_link:
+  path: '/api/add-social-link'
+  controller: 'App\Controller\RegisterController::addSocialLink'
+  methods: ['POST', 'GET']
+update-social-link:
+  path: '/api/update-social-link'
+  controller: 'App\Controller\RegisterController::updateSocialLink'
+  methods: ['POST', 'GET']
+get_social_link:
+  path: '/api/get-social-link'
+  controller: 'App\Controller\RegisterController::getSocialLinks'
+  methods: ['GET']
+search_users:
+    path: '/api/search-users'
+    controller: 'App\Controller\UserController::searchUsers'
+    methods: ['GET']
+api_user_profile:
+    path: '/api/users/{userId}'
+    controller: 'App\Controller\UserController::getUserProfile'
+    methods: ['GET']
+api_add_friend:
+    path: '/api/add-friend'
+    controller: 'App\Controller\UserController::addFriend'
+    methods: ['POST' , 'GET']

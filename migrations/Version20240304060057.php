@@ -32,5 +32,4 @@ final class Version20240304060057 extends AbstractMigration
     {
         $this->addSql('DROP TABLE imagespath');
     }
-    
 }
