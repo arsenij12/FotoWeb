@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import './UserProfile.css';
 
 const UserProfile = () => {
@@ -8,35 +9,39 @@ const UserProfile = () => {
   const [imagePreview, setImagePreview] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [showChangePassword, setShowChangePassword] = useState(false);
-  const [socialLink, setSocialLink] = useState(''); 
-  const [showSocialLinks, setShowSocialLinks] = useState(false); 
-  const navigate = useNavigate();
+  const [socialLink, setSocialLink] = useState('');
+  const [socialNetwork, setSocialNetwork] = useState('');
+  const [showSocialLinks, setShowSocialLinks] = useState(false);
+  const [socialLinks, setSocialLinks] = useState([]);
+  const [friendUsername, setFriendUsername] = useState('');
   const [showNav, setShowNav] = useState(false);
+  const [addingFriend, setAddingFriend] = useState(false);
+
+  const navigate = useNavigate();
 
   const toggleNav = () => {
     setShowNav(!showNav);
   };
 
   useEffect(() => {
-    const user = JSON.parse(localStorage.getItem('user'));
-    setUserFromLocalStorage(user);
-
-    if (user) {
-      fetchSocialLink(user);
+    const userFromLocalStorage = JSON.parse(localStorage.getItem('user'));
+    setUserFromLocalStorage(userFromLocalStorage);
+    if (userFromLocalStorage) {
+      fetchSocialLinks(userFromLocalStorage);
     }
   }, []);
 
-  const fetchSocialLink = async (user) => {
+  const fetchSocialLinks = async (user) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/get-social-link?userId=${user.id}`);
+      const response = await fetch(`http://localhost:8000/api/users/${user.id}`);
       if (response.ok) {
         const data = await response.json();
-        setSocialLink(data.socialLink);
+        setUserFromLocalStorage(data);
       } else {
-        throw new Error('Failed to fetch social link');
+        throw new Error('Failed to fetch user profile');
       }
     } catch (error) {
-      console.error('Error fetching social link:', error);
+      console.error('Error fetching user profile:', error);
     }
   };
 
@@ -123,6 +128,10 @@ const UserProfile = () => {
     setSocialLink(e.target.value);
   };
 
+  const handleSocialNetworkChange = (e) => {
+    setSocialNetwork(e.target.value);
+  };
+
   const handleSaveSocialLink = async () => {
     try {
       const response = await fetch('http://localhost:8000/api/add-social-link', {
@@ -132,7 +141,7 @@ const UserProfile = () => {
         },
         body: JSON.stringify({
           userId: userFromLocalStorage.id,
-          socialNetwork: 'Facebook', // Пример значения, которое может быть введено пользователем
+          socialNetwork: socialNetwork,
           link: socialLink,
         }),
       });
@@ -140,6 +149,7 @@ const UserProfile = () => {
       if (response.ok) {
         const data = await response.json();
         alert(data.message);
+        fetchSocialLinks(userFromLocalStorage);
       } else {
         throw new Error('Failed to add social link');
       }
@@ -151,6 +161,40 @@ const UserProfile = () => {
 
   const handleToggleSocialLinks = () => {
     setShowSocialLinks(true);
+  };
+
+  const handleAddFriend = async () => {
+    try {
+      if (!friendUsername) {
+        alert('Please enter a username to add as a friend');
+        return;
+      }
+
+      const response = await fetch('http://localhost:8000/api/add-friend', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({
+          userId: userFromLocalStorage.id,
+          friendUsername: friendUsername,
+        }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setUserFromLocalStorage((prevUser) => ({
+          ...prevUser,
+          friends: Array.isArray(prevUser.friends) ? [...prevUser.friends, data.friend] : [data.friend],
+        }));
+        alert('Friend added successfully');
+      } else {
+        throw new Error('Failed to add friend');
+      }
+    } catch (error) {
+      console.error('Error adding friend:', error);
+      alert('Error adding friend');
+    }
   };
 
   return (
@@ -165,14 +209,15 @@ const UserProfile = () => {
         <nav className={`main-nav ${showNav ? 'show-nav' : ''}`}>
           <ul>
             <li>
-              <a href="/">Home</a>
+              <Link to="/" className="nav-link">Home</Link>
             </li>
             <li>
-              <a href="/about">About</a>
+              <Link to="/about" className="nav-link">About</Link>
             </li>
             <li>
-              <a href="/services">Services</a>
+              <Link to="/services" className="nav-link">Services</Link>
             </li>
+            <li><Link to="/search" className="nav-link">Search</Link></li>
             <li>
               <button onClick={handleLogout}>Logout</button>
             </li>
@@ -199,6 +244,30 @@ const UserProfile = () => {
               <label htmlFor="imageInput">Upload Image:</label>
               <input type="file" id="imageInput" accept="image/*" onChange={handleImageChange} />
               <button onClick={handleImageUpload}>Upload Image</button>
+            </div>
+            <div className="profile-info-card">
+              <button onClick={() => setAddingFriend(true)}>Friendship</button>
+              {addingFriend && (
+                <div>
+                  <input
+                    type="text"
+                    value={friendUsername}
+                    onChange={(e) => setFriendUsername(e.target.value)}
+                    placeholder="Enter friend's username"
+                  />
+                  <button onClick={handleAddFriend}>Add Friend</button>
+                </div>
+              )}
+              {userFromLocalStorage.friends && Array.isArray(userFromLocalStorage.friends) && userFromLocalStorage.friends.length > 0 ? (
+                userFromLocalStorage.friends.map((friend, index) => (
+                  <div key={index} className="friend-ship">
+                    <Link to={`/users/${friend.id}`} className="friend-ship-info">Name: {friend.name}</Link>
+                    <p className="friend-ship-info">Email: {friend.email}</p>
+                  </div>
+                ))
+              ) : (
+                <p>No friends added</p>
+              )}
             </div>
             <div className="profile-info-card">
               <button onClick={handleEditProfile}>Edit Profile</button>
@@ -229,10 +298,31 @@ const UserProfile = () => {
                     value={socialLink}
                     onChange={handleSocialLinkChange}
                   />
+                  <label htmlFor="socialNetworkInput">Social Network:</label>
+                  <input
+                    type="text"
+                    id="socialNetworkInput"
+                    value={socialNetwork}
+                    onChange={handleSocialNetworkChange}
+                  />
                   <button onClick={handleSaveSocialLink}>Save Link</button>
                 </>
               ) : (
                 <button onClick={handleToggleSocialLinks}>Add Social Link</button>
+              )}
+            </div>
+            <div className="profile-info-card">
+              <p className="profile-info-label">Social Links:</p>
+              {socialLinks.length > 0 ? (
+                <ul>
+                  {socialLinks.map((link, index) => (
+                    <li key={index}>
+                      <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                    </li>
+                  ))}
+                </ul>
+              ) : (
+                <p>No social links added</p>
               )}
             </div>
             <div className="profile-info-card">

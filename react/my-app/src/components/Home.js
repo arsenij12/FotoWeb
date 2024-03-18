@@ -29,13 +29,15 @@ const Home = () => {
               <li><Link to="/" className="nav-link">Home</Link></li>
               <li><Link to="/about" className="nav-link">About</Link></li>
               <li><Link to="/services" className="nav-link">Services</Link></li>
-              <li>
-                {userFromLocalStorage ? (
-                  <Link to="/profile" className="nav-link">Go to Profile</Link>
-                ) : (
-                  <Link to="/register" className="nav-link">Register/Login</Link>
-                )}
-              </li>
+              {userFromLocalStorage && (
+                <>
+                  <li><Link to="/search" className="nav-link">Search</Link></li>
+                  <li><Link to="/profile" className="nav-link">Go to Profile</Link></li>
+                </>
+              )}
+              {!userFromLocalStorage && (
+                <li><Link to="/register" className="nav-link">Register/Login</Link></li>
+              )}
             </ul>
           </nav>
         </header>

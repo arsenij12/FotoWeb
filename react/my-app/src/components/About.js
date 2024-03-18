@@ -31,13 +31,15 @@ const About = () => {
               <li><Link to="/" className="nav-link">Home</Link></li>
               <li><Link to="/about" className="nav-link">About</Link></li>
               <li><Link to="/services" className="nav-link">Services</Link></li>
-              <li>
-                {userFromLocalStorage ? (
-                  <Link to="/profile" className="nav-link">Go to Profile</Link>
-                ) : (
-                  <Link to="/register" className="nav-link">Register/Login</Link>
-                )}
-              </li>
+              {userFromLocalStorage && (
+                <>
+                  <li><Link to="/search" className="nav-link">Search</Link></li>
+                  <li><Link to="/profile" className="nav-link">Go to Profile</Link></li>
+                </>
+              )}
+              {!userFromLocalStorage && (
+                <li><Link to="/register" className="nav-link">Register/Login</Link></li>
+              )}
             </ul>
           </nav>
         </header>
@@ -56,7 +58,7 @@ const About = () => {
           </div>
           <div className="col-md-4">
             <div className="slider-container">
-              <Slider autoplay = "true">
+              <Slider>
                 <div className="slide-item"><img src="http://localhost:8000/images/Img1.png" alt="Image 1"></img></div>
                 <div className="slide-item"><img src="http://localhost:8000/images/img2.png" alt="Image 2"></img></div>
                 <div className="slide-item"><img src="http://localhost:8000/images/Img3.png" alt="Image 3"></img></div>

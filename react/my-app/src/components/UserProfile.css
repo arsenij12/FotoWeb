@@ -1,32 +1,41 @@
-
-.image-preview {
-  max-width: 100%; /* Максимальная ширина изображения будет равна ширине контейнера */
-  max-height: 300px; /* Максимальная высота изображения будет 300px */
-  object-fit: contain; /* Изображение будет подстроено по размерам без искажения */
+.user-profile-main {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
-  
-  
-  .user-profile-main {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-  }
-  
-  .profile-info-card {
-    border: 1px solid #ccc;
-    border-radius: 5px;
-    padding: 10px;
-    margin-bottom: 10px;
-    background-color: #30303086;
-  }
-  
-  .profile-info-label {
-    font-weight: bold;
-  }
-  
-  .profile-info {
-    margin-top: 5px;
-    color: #fff;
-  }
-  
+.profile-info-card {
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #30303086;
+  width: 100%; /* Добавляем, чтобы блоки занимали максимальную ширину */
+}
+
+.profile-info-label {
+  font-weight: bold;
+}
+
+.profile-info {
+  margin-top: 5px;
+  color: #fff;
+}
+
+.friend-ship {
+  display: flex;
+  justify-content: left;
+  margin-top: 20px;
+}
+
+.friend-ship-info{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  padding: 10px;
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  margin-bottom: 10px;
+  background-color: #303030be;
+  width: 100%; 
+}

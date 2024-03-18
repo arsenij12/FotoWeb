@@ -7,6 +7,8 @@ import Services from './components/Services';
 import Register from './components/Register';
 import RegisterPage from './components/RegisterPage';
 import UserProfile from './components/UserProfile';
+import Search from './components/Search';
+import Users from './components/Users';
 
 const App = () => (
   <Router>
@@ -18,6 +20,8 @@ const App = () => (
         <Route path="/register" element={<Register />} />
         <Route path="/profile" element={<UserProfile />} />
         <Route path="/RegisterPage" element={<RegisterPage />} />
+        <Route path="/Search" element={<Search />}/>
+        <Route path="/users/:userId" element={<Users />} /> 
       </Routes>
     </UserProvider>
   </Router>
