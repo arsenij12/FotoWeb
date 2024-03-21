@@ -19,7 +19,7 @@ const Search = () => {
 
   const handleSearch = async () => {
     try {
-      const response = await axios.get(`http://localhost:8000/api/search-users?username=${searchTerm}`);
+      const response = await axios.get(`http://localhost:8001/api/search-users?username=${searchTerm}`);
       setSearchResults(response.data);
     } catch (error) {
       console.error('Error searching users:', error);
@@ -38,6 +38,7 @@ const Search = () => {
             <li><Link to="/" className="nav-link">Home</Link></li>
             <li><Link to="/about" className="nav-link">About</Link></li>
             <li><Link to="/services" className="nav-link">Services</Link></li>
+            <li><Link to="/feed" className="nav-link">Feed's</Link></li>
             <li><Link to="/profile" className="nav-link">Go to Profile</Link></li>
           </ul>
         </nav>

@@ -9,6 +9,8 @@ import RegisterPage from './components/RegisterPage';
 import UserProfile from './components/UserProfile';
 import Search from './components/Search';
 import Users from './components/Users';
+import Feed from './components/Feed';
+
 
 const App = () => (
   <Router>
@@ -22,6 +24,7 @@ const App = () => (
         <Route path="/RegisterPage" element={<RegisterPage />} />
         <Route path="/Search" element={<Search />}/>
         <Route path="/users/:userId" element={<Users />} /> 
+        <Route path="/feed" element={<Feed />} />
       </Routes>
     </UserProvider>
   </Router>

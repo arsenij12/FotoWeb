@@ -1,12 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useNavigate } from 'react-router-dom';
-import { Link } from 'react-router-dom';
+import { useNavigate, Link } from 'react-router-dom';
 import './UserProfile.css';
 
 const UserProfile = () => {
   const [userFromLocalStorage, setUserFromLocalStorage] = useState(null);
-  const [selectedImage, setSelectedImage] = useState(null);
-  const [imagePreview, setImagePreview] = useState(null);
   const [newPassword, setNewPassword] = useState('');
   const [showChangePassword, setShowChangePassword] = useState(false);
   const [socialLink, setSocialLink] = useState('');
@@ -16,76 +13,103 @@ const UserProfile = () => {
   const [friendUsername, setFriendUsername] = useState('');
   const [showNav, setShowNav] = useState(false);
   const [addingFriend, setAddingFriend] = useState(false);
-
+  const [selectedImage, setSelectedImage] = useState(null);
+  const [imagePreview, setImagePreview] = useState(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [changeImg, setChangeImg] = useState(false);
+  const [scrollingImages, setScrollingImages] = useState([]);
+  const [text, setText] = useState('');
   const navigate = useNavigate();
+
+  const toogleChangeImg = () => {
+    setChangeImg(!changeImg);
+  };
 
   const toggleNav = () => {
     setShowNav(!showNav);
   };
 
-  useEffect(() => {
-    const userFromLocalStorage = JSON.parse(localStorage.getItem('user'));
-    setUserFromLocalStorage(userFromLocalStorage);
-    if (userFromLocalStorage) {
-      fetchSocialLinks(userFromLocalStorage);
-    }
-  }, []);
+  const toggleSettings = () => {
+    setShowSettings(!showSettings);
+  };
 
-  const fetchSocialLinks = async (user) => {
+  const toggleFriendShip = () => {
+    setAddingFriend(!addingFriend);
+  };
+
+  useEffect(() => {
+    const fetchUserProfile = async () => {
+      try {
+        const userFromLocalStorage = JSON.parse(localStorage.getItem('user'));
+        setUserFromLocalStorage(userFromLocalStorage);
+    
+        if (userFromLocalStorage) {
+          const response = await fetch(`http://localhost:8001/api/get-social-links/${userFromLocalStorage.id}`);
+    
+          if (response.ok) {
+            const data = await response.json();
+            console.log('Response data:', data);
+            setSocialLinks(data.socialLinks);
+            if (Array.isArray(data.socialLinks)) { 
+              setScrollingImages(data.socialLinks.map(image => ({
+                image_name: image.image_name,
+                post_text: image.post_text
+              })));
+            } else {
+              throw new Error('Data is not an array');
+            }
+            fetchFriends(userFromLocalStorage.id);
+            fetchScrollingImages(userFromLocalStorage.id);
+          } else {
+            throw new Error('Failed to fetch social links');
+          }
+        }
+      } catch (error) {
+        console.error('Error fetching user profile:', error);
+      }
+    };
+    
+  
+    const fetchScrollingImages = async (userId) => {
+      try {
+        const response = await fetch(`http://localhost:8000/get-image-scrolling/${userId}`);
+  
+        if (response.ok) {
+          const data = await response.json();
+          setScrollingImages(data);
+        } else {
+          throw new Error('Failed to fetch scrolling images');
+        }
+      } catch (error) {
+        console.error('Error fetching scrolling images:', error);
+      }
+    };
+  
+    fetchUserProfile();
+  }, []);
+  
+  
+
+  const fetchFriends = async (userId) => {
     try {
-      const response = await fetch(`http://localhost:8000/api/users/${user.id}`);
+      const response = await fetch(`http://localhost:8001/api/get-friends/${userId}`);
       if (response.ok) {
         const data = await response.json();
-        setUserFromLocalStorage(data);
+        setUserFromLocalStorage((prevUser) => ({
+          ...prevUser,
+          friends: data.friends,
+        }));
       } else {
-        throw new Error('Failed to fetch user profile');
+        throw new Error('Failed to fetch friends');
       }
     } catch (error) {
-      console.error('Error fetching user profile:', error);
+      console.error('Error fetching friends:', error);
     }
   };
 
   const handleLogout = () => {
     localStorage.removeItem('user');
     navigate('/register');
-  };
-
-  const handleImageChange = (e) => {
-    const image = e.target.files[0];
-    setSelectedImage(image);
-
-    const reader = new FileReader();
-    reader.onloadend = () => {
-      setImagePreview(reader.result);
-    };
-    reader.readAsDataURL(image);
-  };
-
-  const handleImageUpload = async () => {
-    if (selectedImage) {
-      const formData = new FormData();
-      formData.append('image', selectedImage);
-
-      try {
-        const response = await fetch('http://localhost:8000/api/upload-image', {
-          method: 'POST',
-          body: formData,
-        });
-
-        if (response.ok) {
-          const data = await response.json();
-          console.log('Uploaded file info:', data.file_info);
-          alert('Image uploaded successfully');
-        } else {
-          alert('Failed to upload image');
-        }
-      } catch (error) {
-        console.error('Error uploading image:', error);
-        alert('Error uploading image');
-      }
-    } else {
-      alert('Please select an image');
-    }
   };
 
   const handleEditProfile = () => {
@@ -101,9 +125,52 @@ const UserProfile = () => {
     setNewPassword('');
   };
 
+  const handleImageChange = (e) => {
+    const file = e.target.files[0];
+    if (file) {
+      setSelectedImage(file);
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleImageUpload = async () => {
+    try {
+      if (!selectedImage) {
+        alert('Please select an image to upload');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', selectedImage);
+      formData.append('username', userFromLocalStorage.name);
+      formData.append('userid', userFromLocalStorage.id);
+      formData.append('text', text)
+
+
+      const response = await fetch('http://localhost:8000/upload-image', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        alert('Image uploaded successfully');
+        fetchScrollingImages(userFromLocalStorage.id);
+      } else {
+        throw new Error('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image');
+    }
+  };
+
   const handleSubmitNewPassword = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/change-password', {
+      const response = await fetch('http://localhost:8001/api/change-password', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -134,7 +201,7 @@ const UserProfile = () => {
 
   const handleSaveSocialLink = async () => {
     try {
-      const response = await fetch('http://localhost:8000/api/add-social-link', {
+      const response = await fetch('http://localhost:8001/api/add-social-link', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -163,6 +230,35 @@ const UserProfile = () => {
     setShowSocialLinks(true);
   };
 
+  const handleUploadClick = async () => {
+    try {
+      if (!selectedImage) {
+        alert('Please select an image to upload');
+        return;
+      }
+
+      const formData = new FormData();
+      formData.append('image', selectedImage);
+      formData.append('text', text)
+      formData.append('username', userFromLocalStorage.name);
+      formData.append('userid', userFromLocalStorage.id);
+
+      const response = await fetch('http://localhost:8000/upload-image-scrolling', {
+        method: 'POST',
+        body: formData,
+      });
+
+      if (response.ok) {
+        alert('Image uploaded successfully');
+      } else {
+        throw new Error('Failed to upload image');
+      }
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      alert('Error uploading image');
+    }
+  };
+
   const handleAddFriend = async () => {
     try {
       if (!friendUsername) {
@@ -170,7 +266,7 @@ const UserProfile = () => {
         return;
       }
 
-      const response = await fetch('http://localhost:8000/api/add-friend', {
+      const response = await fetch('http://localhost:8001/api/add-friend', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -218,121 +314,172 @@ const UserProfile = () => {
               <Link to="/services" className="nav-link">Services</Link>
             </li>
             <li><Link to="/search" className="nav-link">Search</Link></li>
+            <li><Link to="/feed" className="nav-link">Feed's</Link></li>
             <li>
               <button onClick={handleLogout}>Logout</button>
             </li>
           </ul>
         </nav>
+        <button className="setting-btn" onClick={toggleSettings}>Settings</button>
+
       </header>
       <main className="user-profile-main">
-        {userFromLocalStorage ? (
-          <div className="user-profile-info">
-            <div className="profile-info-card">
-              <p className="profile-info-label">ID:</p>
-              <p className="profile-info">{userFromLocalStorage.id}</p>
-            </div>
-            <div className="profile-info-card">
-              <p className="profile-info-label">Email:</p>
-              <p className="profile-info">{userFromLocalStorage.email}</p>
-            </div>
-            <div className="profile-info-card">
-              <p className="profile-info-label">Name:</p>
-              <p className="profile-info">{userFromLocalStorage.name}</p>
-            </div>
-            <div className="profile-info-card">
-              {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
-              <label htmlFor="imageInput">Upload Image:</label>
-              <input type="file" id="imageInput" accept="image/*" onChange={handleImageChange} />
-              <button onClick={handleImageUpload}>Upload Image</button>
-            </div>
-            <div className="profile-info-card">
-              <button onClick={() => setAddingFriend(true)}>Friendship</button>
-              {addingFriend && (
-                <div>
-                  <input
-                    type="text"
-                    value={friendUsername}
-                    onChange={(e) => setFriendUsername(e.target.value)}
-                    placeholder="Enter friend's username"
-                  />
-                  <button onClick={handleAddFriend}>Add Friend</button>
+        {showSettings ? (
+          <div>
+            {userFromLocalStorage ? (
+              <div className="user-profile-info">
+                <div className="profile-info-card">
+                  <p className="profile-info-label">ID:</p>
+                  <p className="profile-info">{userFromLocalStorage.id}</p>
                 </div>
-              )}
-              {userFromLocalStorage.friends && Array.isArray(userFromLocalStorage.friends) && userFromLocalStorage.friends.length > 0 ? (
-                userFromLocalStorage.friends.map((friend, index) => (
-                  <div key={index} className="friend-ship">
-                    <Link to={`/users/${friend.id}`} className="friend-ship-info">Name: {friend.name}</Link>
-                    <p className="friend-ship-info">Email: {friend.email}</p>
+                <div className="profile-info-card">
+                  <p className="profile-info-label">Email:</p>
+                  <p className="profile-info">{userFromLocalStorage.email}</p>
+                </div>
+                <div className="profile-info-card-usersname">
+                  <div className="user-profile-image" onClick={toogleChangeImg}>
+                    <img src={`http://127.0.0.1:8000/profile-image/${userFromLocalStorage.name}_${userFromLocalStorage.id}`} alt="Preview" className="image-preview" />
                   </div>
-                ))
-              ) : (
-                <p>No friends added</p>
-              )}
-            </div>
-            <div className="profile-info-card">
-              <button onClick={handleEditProfile}>Edit Profile</button>
-            </div>
-            <div className="profile-info-card">
-              <button onClick={handleChangePassword}>Change Password</button>
-            </div>
-            {showChangePassword && (
-              <div className="profile-info-card">
-                <label htmlFor="newPasswordInput">New Password:</label>
-                <input
-                  type="password"
-                  id="newPasswordInput"
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                />
-                <button onClick={handleSubmitNewPassword}>Submit</button>
-                <button onClick={handleCancelChangePassword}>Cancel</button>
+                  <div className="user-profile-info">
+                    <p className="profile-info-label">Name:</p>
+                    <p className="profile-info">{userFromLocalStorage.name}</p>
+                  </div>
+                </div>
+                {changeImg && (
+
+                  <div className="profile-info-card">
+                    {imagePreview && <img src={imagePreview} alt="Preview" className="image-preview" />}
+                    <label htmlFor="imageInput">Upload Image:</label>
+                    <input type="file" id="imageInput" accept="image/*" onChange={handleImageChange} />
+                    <button onClick={handleImageUpload}>Upload Image</button>
+                  </div>
+                )}
+                <div className="profile-info-card">
+                  <button onClick={toggleFriendShip}>Friendship</button>
+                  {addingFriend && (
+                    <div>
+                      <input
+                        type="text"
+                        value={friendUsername}
+                        onChange={(e) => setFriendUsername(e.target.value)}
+                        placeholder="Enter friend's username"
+                      />
+                      <button onClick={handleAddFriend}>Add Friend</button>
+                    </div>
+                  )}
+                  {userFromLocalStorage.friends && Array.isArray(userFromLocalStorage.friends) && userFromLocalStorage.friends.length > 0 ? (
+                    userFromLocalStorage.friends.map((friend, index) => (
+                      <div key={index} className="friend-ship">
+                        <Link to={`/users/${friend.id}`} className="friend-ship-info">Name: {friend.name}</Link>
+                        <p className="friend-ship-info">Email: {friend.email}</p>
+                      </div>
+                    ))
+                  ) : (
+                    <p>No friends added</p>
+                  )}
+                </div>
+                <div className="profile-info-card">
+                  <button onClick={handleEditProfile}>Edit Profile</button>
+                </div>
+                <div className="profile-info-card">
+                  <button onClick={handleChangePassword}>Change Password</button>
+                </div>
+                {showChangePassword && (
+                  <div className="profile-info-card">
+                    <label htmlFor="newPasswordInput">New Password:</label>
+                    <input
+                      type="password"
+                      id="newPasswordInput"
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
+                    />
+                    <button onClick={handleSubmitNewPassword}>Submit</button>
+                    <button onClick={handleCancelChangePassword}>Cancel</button>
+                  </div>
+                )}
+                <div className="profile-info-card">
+                  {showSocialLinks ? (
+                    <>
+                      <label htmlFor="socialLinkInput">Social Link:</label>
+                      <input
+                        type="text"
+                        id="socialLinkInput"
+                        value={socialLink}
+                        onChange={handleSocialLinkChange}
+                      />
+                      <label htmlFor="socialNetworkInput">Social Network:</label>
+                      <input
+                        type="text"
+                        id="socialNetworkInput"
+                        value={socialNetwork}
+                        onChange={handleSocialNetworkChange}
+                      />
+                      <button onClick={handleSaveSocialLink}>Save Link</button>
+                    </>
+                  ) : (
+                    <button onClick={handleToggleSocialLinks}>Add Social Link</button>
+                  )}
+                </div>
+                <div className="profile-info-card">
+                  <p className="profile-info-label">Social Links:</p>
+                  {socialLinks.length > 0 ? (
+                    <ul>
+                      {socialLinks.map((link, index) => (
+                        <li key={index}>
+                          <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p>No social links added</p>
+                  )}
+                </div>
+                <div className="profile-info-card">
+                  <p className="profile-info-label">Activity:</p>
+                  <p className="profile-info">Logins: {userFromLocalStorage.logins}</p>
+                  <p className="profile-info">Actions: {userFromLocalStorage.actions}</p>
+                </div>
               </div>
+            ) : (
+              <p className="profile-info">Please log in</p>
             )}
-            <div className="profile-info-card">
-              {showSocialLinks ? (
-                <>
-                  <label htmlFor="socialLinkInput">Social Link:</label>
-                  <input
-                    type="text"
-                    id="socialLinkInput"
-                    value={socialLink}
-                    onChange={handleSocialLinkChange}
-                  />
-                  <label htmlFor="socialNetworkInput">Social Network:</label>
-                  <input
-                    type="text"
-                    id="socialNetworkInput"
-                    value={socialNetwork}
-                    onChange={handleSocialNetworkChange}
-                  />
-                  <button onClick={handleSaveSocialLink}>Save Link</button>
-                </>
-              ) : (
-                <button onClick={handleToggleSocialLinks}>Add Social Link</button>
-              )}
-            </div>
-            <div className="profile-info-card">
-              <p className="profile-info-label">Social Links:</p>
-              {socialLinks.length > 0 ? (
-                <ul>
-                  {socialLinks.map((link, index) => (
-                    <li key={index}>
-                      <a href={link} target="_blank" rel="noopener noreferrer">{link}</a>
-                    </li>
-                  ))}
-                </ul>
-              ) : (
-                <p>No social links added</p>
-              )}
-            </div>
-            <div className="profile-info-card">
-              <p className="profile-info-label">Activity:</p>
-              <p className="profile-info">Logins: {userFromLocalStorage.logins}</p>
-              <p className="profile-info">Actions: {userFromLocalStorage.actions}</p>
-            </div>
           </div>
         ) : (
-          <p className="profile-info">Please log in</p>
+          <div>
+            <div>
+              <input type="file" onChange={handleImageChange} accept="image/*" />
+
+              {selectedImage && (
+                <div className='profile-info-card-uploud-post'>
+                  <h3>Selected Image:</h3>
+                  <img src={URL.createObjectURL(selectedImage)} alt="Selected" width="200" />
+                  <input type='text' value={text} onChange={(e) => setText(e.target.value)} placeholder="Введите текст"/>
+                </div>
+              )}
+
+              <button onClick={handleUploadClick}>Upload Image</button>
+            </div>
+            <div>
+              {scrollingImages.map((image, index) => (
+                <div key={index} className='profile-info-card-usersname'> 
+                  <div className='post-imgs-div'>
+                    <img src={`http://127.0.0.1:8000/get_images/${image.image_name}_${userFromLocalStorage.id}`} alt={`Image ${index}`} className='users-post'/>
+                  </div>
+                  <ul>
+                    <li>
+                      <h1>{userFromLocalStorage.name}'s Post</h1>
+                    </li>
+                    <li>
+                      <p>{image.post_text}</p>
+                    </li>
+                  </ul>
+                  
+                </div>
+              ))}
+
+            </div>
+
+          </div>
         )}
       </main>
       <footer>
@@ -343,3 +490,4 @@ const UserProfile = () => {
 };
 
 export default UserProfile;
+

@@ -15,7 +15,7 @@ const LoginPage = () => {
   };
 
   const axiosInstance = axios.create({
-    baseURL: 'http://127.0.0.1:8000/', 
+    baseURL: 'http://127.0.0.1:8001/', 
   });
 
   const handleLogin = async () => {
@@ -28,8 +28,7 @@ const LoginPage = () => {
       if (response.data.success) {
         setUser(response.data.user); 
         navigate('/profile');
-        localStorage.setItem('user', JSON.stringify(response.data.user)); // Сохраняем данные пользователя в localStorage
-      } else {
+        localStorage.setItem('user', JSON.stringify(response.data.user)); 
         alert(response.data.message);
       }
     } catch (error) {
@@ -55,7 +54,7 @@ const LoginPage = () => {
       <main>
         <div className="container">
           {user ? (
-            <UserProfile user={user} /> // Рендеринг UserProfile при успешной аутентификации
+            <UserProfile user={user} /> 
           ) : (
             <div className="row justify-content-center">
               <div className="col-md-8">

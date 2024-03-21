@@ -32,6 +32,7 @@ const Home = () => {
               {userFromLocalStorage && (
                 <>
                   <li><Link to="/search" className="nav-link">Search</Link></li>
+                  <li><Link to="/feed" className="nav-link">Feed's</Link></li>
                   <li><Link to="/profile" className="nav-link">Go to Profile</Link></li>
                 </>
               )}
@@ -60,13 +61,13 @@ const Home = () => {
               <h2>Ссылки на социальные сети</h2>
               <div className="social-buttons">
                 <a href="https://www.facebook.com/" target="_blank">
-                  <img src="http://localhost:8000/images/FacebookHome.png" alt="Facebook" />
+                  <img src="http://localhost:8001/images/FacebookHome.png" alt="Facebook" />
                 </a>
                 <a href="https://twitter.com/" target="_blank">
-                  <img src="http://localhost:8000/images/TwitterHome.png" alt="Twitter" />
+                  <img src="http://localhost:8001/images/TwitterHome.png" alt="Twitter" />
                 </a>
                 <a href="https://www.instagram.com/" target="_blank">
-                  <img src="http://localhost:8000/images/InstagramHome.png" alt="Instagram" />
+                  <img src="http://localhost:8001/images/InstagramHome.png" alt="Instagram" />
                 </a>
               </div>
             </div>
@@ -74,13 +75,11 @@ const Home = () => {
           <div className="row">
             <div className="col-md-12">
               <h2>Важные разделы сайта</h2>
-              {/* Add links to important sections here */}
             </div>
           </div>
           <div className="row">
             <div className="col-md-12">
               <h2>Последние новинки</h2>
-              {/* Add latest photos section here */}
             </div>
           </div>
         </main>

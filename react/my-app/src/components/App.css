@@ -3,7 +3,7 @@ body {
   font-family: Arial, sans-serif;
   margin: 0;
   padding: 0;
-  background-image: url("http://localhost:8000/images/BackGroundImg.jpg");
+  background-image: url("http://localhost:8001/images/BackGroundImg.jpg");
   background-size: cover;
   background-repeat: no-repeat;
   color: #fff;
@@ -37,6 +37,7 @@ main {
   padding: 20px;
   color: #fff;
   user-select: none;
+  padding-bottom: 60px;
 }
 
 footer {

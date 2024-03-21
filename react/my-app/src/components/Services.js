@@ -84,6 +84,7 @@ const Services = () => {
               {userFromLocalStorage && (
                 <>
                   <li><Link to="/search" className="nav-link">Search</Link></li>
+                  <li><Link to="/feed" className="nav-link">Feed's</Link></li>
                   <li><Link to="/profile" className="nav-link">Go to Profile</Link></li>
                 </>
               )}

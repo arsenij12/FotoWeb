@@ -9,8 +9,10 @@
   border-radius: 5px;
   padding: 10px;
   margin-bottom: 10px;
+  margin: 10 auto; 
   background-color: #30303086;
-  width: 100%; /* Добавляем, чтобы блоки занимали максимальную ширину */
+  width: calc(100vw - 100px); 
+  
 }
 
 .profile-info-label {
@@ -38,4 +40,60 @@
   margin-bottom: 10px;
   background-color: #303030be;
   width: 100%; 
+}
+
+.image-preview{
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+}
+.profile-info-card-usersname{
+  border: 1px solid #ccc;
+  border-radius: 5px;
+  padding: 10px;
+  margin-bottom: 10px;
+  background-color: #30303086;
+  width: 100%;
+  justify-content:left;
+  display: flex;
+  
+}
+
+  .user-profile-image{
+    width: 102px;
+    height: 102px;
+    border-radius: 50%;
+    background-color: #64646496;
+    margin-right: 3%;
+  }
+
+  .users-post{
+    width: 102px;
+    height: 102px;
+    border-radius: 4%;
+    background-color: #64646496;
+    margin-right: 3%;
+  }
+
+  .post-imgs-div{
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 5px;
+    margin-bottom: 10px;
+    background-color: #30303086;
+    justify-content:left;
+    display: flex;
+  }
+
+  .profile-info-card-uploud-post{
+    border: 1px solid #ccc;
+    border-radius: 5px;
+    padding: 10px;
+    margin-bottom: 10px;
+    background-color: #30303086;
+    width: 100%;
+    justify-content:left;
+    display: flex;
+    flex-wrap: wrap;
+    flex-direction: column;
 }
